@@ -6,6 +6,7 @@
 #include <vector>
 #include <fstream>
 #include <regex>
+#include <sstream>
 namespace fs = std::filesystem;
 
 class filemanager{
@@ -20,13 +21,12 @@ class filemanager{
         return home;
     }
 
-
     public:
     filemanager(){
         homeDir = getHome();
     }
 
-    bool searchRc(std::string filename){ // to find .zshrc or .bashrc
+    bool searchRc(std::string filename){
         bool found = false;
         for (const auto& entry : std::filesystem::directory_iterator(homeDir)) {
             if (entry.path().filename() == filename){
@@ -53,6 +53,37 @@ class filemanager{
         return aliases;
     }
 
+    bool updateAlias(std::string filename, const std::string& oldAlias, const std::string& newAlias, const std::string& command) {
+        std::ifstream file(homeDir / filename);
+        if (!file)
+            return false;
+
+        std::stringstream buffer;
+        std::string line;
+        const std::regex rx(R"(^\s*alias\s+)" + oldAlias + R"(\s*=\s*['"]([^'"]+)['"]\s*$)");
+        bool found = false;
+
+        while (std::getline(file, line)) {
+            std::smatch m;
+            if (std::regex_match(line, m, rx)) {
+                buffer << "alias " << newAlias << "=\"" << command << "\"" << std::endl;
+                found = true;
+            } else {
+                buffer << line << std::endl;
+            }
+        }
+        file.close();
+
+        if (!found)
+            return false;
+
+        std::ofstream outfile(homeDir / filename, std::ios::trunc);
+        if (!outfile)
+            return false;
+
+        outfile << buffer.str();
+        return true;
+    }
 };
 
-#endif // ALIASM_UTIL_FILE_H
+#endif
