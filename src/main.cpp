@@ -2,7 +2,7 @@
 #include "ui/window.h"
 // #include "ui/rc_picker.h"
 #include <vector>
-#include "file.cpp"
+#include "util/file.h"
 
 
 int main(int argc, char* argv[]) {
