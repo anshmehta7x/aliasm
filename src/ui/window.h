@@ -12,6 +12,7 @@
 #include <utility>
 #include "../util/file.h"
 #include "aliaslist.h"
+#include "addalias.h"
 
 class MainWindow : public Gtk::Window {
 public:
@@ -20,6 +21,7 @@ public:
     Gtk::Label statusLabel;
     AliasList aliasList;
     Gtk::ScrolledWindow scrolled;
+    AddButton add;
 
     filemanager fileManager;
     std::pair<Glib::ustring, std::string> selectedItem;
@@ -45,7 +47,9 @@ public:
             setupDropdown(items);
             m_box.append(dropdown);
             statusLabel.set_text("Select a shell");
+            add.set_on_click(addClicked);
             m_box.append(statusLabel);
+            m_box.append(add);
             m_box.append(scrolled);
         }
 
@@ -115,6 +119,11 @@ public:
         dropdown.set_selected(0);
         selectedItem = std::make_pair(items[0], getFilename(items[0]));
     }
+
+    std::function<void()> addClicked = [this]() {
+        std::cout << "Add button clicked" << std::endl;
+        // Add functionality to add a new alias
+    };
 };
 
 #endif
