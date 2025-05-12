@@ -1,8 +1,11 @@
 #include <filesystem>
 #include <stdexcept>
+#include <vector>
+#include <fstream>
+#include <regex>
 namespace fs = std::filesystem;
 
-class file{
+class filemanager{
     private:
     fs::path homeDir;
 
@@ -16,7 +19,7 @@ class file{
 
 
     public:
-    file(){
+    filemanager(){
         homeDir = getHome();
     }
 
@@ -30,5 +33,21 @@ class file{
         return false;
     }
 
+    std::vector<std::pair<std::string, std::string>> getAliases(std::string filename){
+        std::vector<std::pair<std::string, std::string>> aliases;
+        std::ifstream file(homeDir / filename);
+        if (!file)
+            throw std::runtime_error("Could not open file: " + filename);
+
+        const std::regex rx(R"(^\s*alias\s+([A-Za-z0-9_\-]+)\s*=\s*['"]([^'"]+)['"]\s*$)");
+        std::string line;
+        std::smatch m;
+
+        while (std::getline(file, line)) {
+            if (std::regex_match(line, m, rx))
+                aliases.emplace_back(m[1].str(), m[2].str());
+        }
+        return aliases;
+    }
 
 };

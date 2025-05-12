@@ -1,12 +1,12 @@
 #include <gtkmm/application.h>
 #include "ui/window.h"
 // #include "ui/rc_picker.h"
-#include <iostream>
+#include <vector>
 #include "file.cpp"
 
 
 int main(int argc, char* argv[]) {
-    file f;
+    filemanager f;
     std::vector<Glib::ustring> items;
     if (f.searchRc(".zshrc")){
         items.push_back("zsh");
