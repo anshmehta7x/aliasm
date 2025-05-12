@@ -10,12 +10,14 @@
 #include <stdexcept>
 #include <utility>
 #include "../util/file.h"
+#include "aliaslist.h"
 
 class MainWindow : public Gtk::Window {
 public:
     Gtk::Box m_box;
     Gtk::DropDown dropdown;
     Gtk::Label statusLabel;
+    AliasList aliasList;
 
     filemanager fileManager;
     std::pair<Glib::ustring, std::string> selectedItem; // stores shell , filename
@@ -36,7 +38,6 @@ public:
         } else {
             setupDropdown(items);
             m_box.append(dropdown);
-
             statusLabel.set_text("Select a shell");
             m_box.append(statusLabel);
         }
@@ -61,9 +62,12 @@ public:
         aliases = fileManager.getAliases(selectedItem.second);
 
         if(aliases.size() == 0) {
+            aliasList.removeAliases();
             statusLabel.set_text("No aliases found");
         } else {
-            statusLabel.set_text("Found " + std::to_string(aliases.size()) + " aliases");
+            aliasList.removeAliases();
+            aliasList.addAliases(aliases);
+            m_box.append(aliasList);
         }
     }
 
