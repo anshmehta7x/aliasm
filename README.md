@@ -6,7 +6,7 @@ gtkmm 4.0 devel
 
 
 ### For fedora systems: 
-    ```sudo dnf install gtkmm4.0-devel```
+```sudo dnf install gtkmm4.0-devel```
 ### For Debian based distros: 
 ```sudo apt install libgtkmm-4.0-dev```
 
