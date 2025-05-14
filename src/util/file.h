@@ -93,6 +93,38 @@ class filemanager{
         outfile << buffer.str();
         return true;
     }
+
+    bool removeAlias(std::string filename, const std::string& aliasToRemove) {
+        std::ifstream file(homeDir / filename);
+        if (!file)
+            return false;
+
+        std::stringstream buffer;
+        std::string line;
+        const std::regex rx(R"(^\s*alias\s+)" + aliasToRemove + R"(\s*=\s*['"]([^'"]+)['"]\s*$)");
+        bool found = false;
+
+        while (std::getline(file, line)) {
+            std::smatch m;
+            if (std::regex_match(line, m, rx)) {
+                found = true;
+                // Skip this line to effectively remove it
+            } else {
+                buffer << line << std::endl;
+            }
+        }
+        file.close();
+
+        if (!found)
+            return false;
+
+        std::ofstream outfile(homeDir / filename, std::ios::trunc);
+        if (!outfile)
+            return false;
+
+        outfile << buffer.str();
+        return true;
+    }
 };
 
 #endif

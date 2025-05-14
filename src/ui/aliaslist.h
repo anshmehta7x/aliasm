@@ -13,12 +13,15 @@
 class AliasList : public Gtk::Box {
 public:
     using SaveCallback = std::function<void(const std::string&, const std::string&, const std::string&)>;
+    using RemoveCallback = std::function<void(const std::string&)>;
 
     AliasList() : Gtk::Box(Gtk::Orientation::VERTICAL, 10) {
         set_margin(10);
     }
 
-    void addAliases(const std::vector<std::pair<std::string, std::string>>& aliases, SaveCallback callback) {
+    void addAliases(const std::vector<std::pair<std::string, std::string>>& aliases,
+                    SaveCallback saveCallback,
+                    RemoveCallback removeCallback) {
         for (const auto& alias : aliases) {
             auto row = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 5);
 
@@ -32,20 +35,20 @@ public:
             commandEntry->set_hexpand(true);
 
             auto saveButton = Gtk::make_managed<Gtk::Button>("Save");
-
-            // std::string prevAlias = alias.first;
+            auto removeButton = Gtk::make_managed<Gtk::Button>("Remove");
 
             saveButton->signal_clicked().connect([=]() {
-                callback(alias.first, aliasEntry->get_text(), commandEntry->get_text());
-                    //have to set the value of alias.first to aliasEntry->get_text() so that it updates
-                    // prevAlias = aliasEntry->get_text();
+                saveCallback(alias.first, aliasEntry->get_text(), commandEntry->get_text());
+            });
 
-
+            removeButton->signal_clicked().connect([=]() {
+                removeCallback(alias.first);
             });
 
             row->append(*aliasEntry);
             row->append(*commandEntry);
             row->append(*saveButton);
+            row->append(*removeButton);
 
             append(*row);
         }

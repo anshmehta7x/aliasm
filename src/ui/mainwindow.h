@@ -53,6 +53,7 @@ public:
             m_box.append(statusLabel);
             m_box.append(add);
             m_box.append(scrolled);
+            on_dropdown_change();
         }
 
         dropdown.property_selected().signal_changed().connect(
@@ -80,9 +81,15 @@ public:
             statusLabel.set_text("No aliases found");
         } else {
             statusLabel.set_text(std::to_string(aliases.size()) + " aliases found");
-            aliasList.addAliases(aliases, [this](const std::string& oldAlias, const std::string& newAlias, const std::string& command) {
-                saveAlias(oldAlias, newAlias, command);
-            });
+            aliasList.addAliases(
+                aliases,
+                [this](const std::string& oldAlias, const std::string& newAlias, const std::string& command) {
+                    saveAlias(oldAlias, newAlias, command);
+                },
+                [this](const std::string& alias) {
+                    removeAlias(alias);
+                }
+            );
         }
     }
 
@@ -94,21 +101,51 @@ public:
         // lambda function to hide after 1000 ms
         Glib::signal_timeout().connect_once([&](){
             statusLabel.set_visible(false);
-        },2000);
+        }, 2000);
 
         if (fileManager.updateAlias(selectedItem.second, oldAlias, newAlias, command)) {
             statusLabel.set_text("Alias updated successfully");
         } else {
             statusLabel.set_text("Failed to update alias");
         }
+        refreshAliasList();
+    }
+
+    void removeAlias(const std::string& alias) {
+        std::cout << "Removing alias: " << alias << std::endl;
+        statusLabel.set_visible(true);
+
+        // lambda function to hide after 2000 ms
+        Glib::signal_timeout().connect_once([&](){
+            statusLabel.set_visible(false);
+        }, 2000);
+
+        if (fileManager.removeAlias(selectedItem.second, alias)) {
+            statusLabel.set_text("Alias removed successfully");
+        } else {
+            statusLabel.set_text("Failed to remove alias");
+        }
+        refreshAliasList();
+    }
+
+    void refreshAliasList() {
         aliases = fileManager.getAliases(selectedItem.second);
         aliasList.removeAliases();
-        aliasList.addAliases(aliases, [this](const std::string& oldAlias, const std::string& newAlias, const std::string& command) {
-            saveAlias(oldAlias, newAlias, command);
-        });
-        // for(auto alias:aliases){
-        //     std::cout<<alias.first<<" "<<alias.second<<std::endl;
-        // }
+
+        if (aliases.empty()) {
+            statusLabel.set_text("No aliases found");
+        } else {
+            statusLabel.set_text(std::to_string(aliases.size()) + " aliases found");
+            aliasList.addAliases(
+                aliases,
+                [this](const std::string& oldAlias, const std::string& newAlias, const std::string& command) {
+                    saveAlias(oldAlias, newAlias, command);
+                },
+                [this](const std::string& alias) {
+                    removeAlias(alias);
+                }
+            );
+        }
     }
 
     std::string getFilename(Glib::ustring shell) {
@@ -133,8 +170,10 @@ public:
     std::function<void()> addClicked = [this]() {
         std::cout << "Add button clicked" << std::endl;
         // open new alias window
-        auto newAliasWindow = new NewAliasWindow([](){
-            std::cout << "New alias window button" << std::endl;
+        auto newAliasWindow = new NewAliasWindow(
+        [this](std::string alias,std::string command){
+            return (fileManager.appendAlias(selectedItem.second, alias, command));
+
         });
         newAliasWindow->set_transient_for(*this);
         newAliasWindow->set_modal(true);

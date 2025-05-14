@@ -4,6 +4,7 @@
 #include <gtkmm/window.h>
 #include <gtkmm/label.h>
 #include <gtkmm/box.h>
+#include <string>
 
 using namespace Gtk;
 
@@ -20,7 +21,7 @@ class NewAliasWindow : public Window{
 
     Button addButton;
 
-    NewAliasWindow(const std::function<void()> &callback) : n_box(Gtk::Orientation::VERTICAL, 10){
+    NewAliasWindow(const std::function<bool(std::string, std::string)> &callback) : n_box(Gtk::Orientation::VERTICAL, 10){
         set_title("Add New Alias");
         set_default_size(300, 200);
         set_resizable(false);
@@ -36,6 +37,10 @@ class NewAliasWindow : public Window{
         n_box.append(commandEntry);
         n_box.append(addButton);
 
-        addButton.signal_clicked().connect(callback);
+        addButton.signal_clicked().connect([this, callback](){
+            if(callback(aliasEntry.get_text(), commandEntry.get_text())){
+                close();
+            };
+        });
     }
 };
