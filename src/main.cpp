@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
 
     auto app = Gtk::Application::create("aliasm");
     app->signal_activate().connect([&items, app]() {
-        auto window = new MainWindow(items);
+        auto window = Gtk::make_managed<MainWindow>(items);
         app->add_window(*window);
         window->show();
     });

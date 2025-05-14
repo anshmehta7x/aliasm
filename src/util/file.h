@@ -16,7 +16,7 @@ class filemanager{
     fs::path getHome(){
         const char* home = std::getenv("HOME");
         if(!home){
-            std::runtime_error("No HOME directory found");
+            throw std::runtime_error("No HOME directory found");
         }
         return home;
     }
