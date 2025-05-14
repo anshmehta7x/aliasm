@@ -1,5 +1,5 @@
 #include <gtkmm/application.h>
-#include "ui/window.h"
+#include "ui/mainwindow.h"
 // #include "ui/rc_picker.h"
 #include <vector>
 #include "util/file.h"

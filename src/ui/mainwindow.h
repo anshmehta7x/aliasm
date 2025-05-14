@@ -13,6 +13,8 @@
 #include "../util/file.h"
 #include "aliaslist.h"
 #include "addalias.h"
+#include <glibmm/main.h>
+#include "newaliaswindow.h"
 
 class MainWindow : public Gtk::Window {
 public:
@@ -46,7 +48,7 @@ public:
         } else {
             setupDropdown(items);
             m_box.append(dropdown);
-            statusLabel.set_text("Select a shell");
+            statusLabel.set_visible(false);
             add.set_on_click(addClicked);
             m_box.append(statusLabel);
             m_box.append(add);
@@ -84,8 +86,16 @@ public:
         }
     }
 
+
     void saveAlias(const std::string& oldAlias, const std::string& newAlias, const std::string& command) {
         std::cout << "Saving: " << oldAlias << " → " << newAlias << " = " << command << std::endl;
+        statusLabel.set_visible(true);
+
+        // lambda function to hide after 1000 ms
+        Glib::signal_timeout().connect_once([&](){
+            statusLabel.set_visible(false);
+        },2000);
+
         if (fileManager.updateAlias(selectedItem.second, oldAlias, newAlias, command)) {
             statusLabel.set_text("Alias updated successfully");
         } else {
@@ -122,7 +132,14 @@ public:
 
     std::function<void()> addClicked = [this]() {
         std::cout << "Add button clicked" << std::endl;
-        // Add functionality to add a new alias
+        // open new alias window
+        auto newAliasWindow = new NewAliasWindow([](){
+            std::cout << "New alias window button" << std::endl;
+        });
+        newAliasWindow->set_transient_for(*this);
+        newAliasWindow->set_modal(true);
+        //show the window
+        newAliasWindow->show();
     };
 };
 
