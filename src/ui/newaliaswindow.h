@@ -28,6 +28,7 @@ class NewAliasWindow : public Window{
 
         aliasLabel.set_text("Alias:");
         commandLabel.set_text("Command:");
+        addButton.set_label("Add Alias");
 
         n_box.append(aliasLabel);
         n_box.append(aliasEntry);

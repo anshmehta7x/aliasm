@@ -53,6 +53,15 @@ class filemanager{
         return aliases;
     }
 
+    bool appendAlias(std::string filename, const std::string alias, const std::string command){
+        std::ofstream file(homeDir / filename, std::ios::app);
+        if (!file)
+            return false;
+
+        file << "alias " << alias << "=\"" << command << "\"" << std::endl;
+        return true;
+    }
+
     bool updateAlias(std::string filename, const std::string& oldAlias, const std::string& newAlias, const std::string& command) {
         std::ifstream file(homeDir / filename);
         if (!file)
