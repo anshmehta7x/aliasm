@@ -43,7 +43,7 @@ public:
         scrolled.set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::AUTOMATIC);
 
         if(items.size() == 0) {
-            statusLabel.set_text(".bashrc or .zshrc not found");
+            update_status_label(".bashrc or .zshrc not found");
             m_box.append(statusLabel);
         } else {
             setupDropdown(items);
@@ -59,6 +59,14 @@ public:
         dropdown.property_selected().signal_changed().connect(
             sigc::mem_fun(*this, &MainWindow::on_dropdown_change)
         );
+    }
+
+    void update_status_label(std::string newText){
+        statusLabel.set_visible(true);
+        statusLabel.set_text(newText);
+        Glib::signal_timeout().connect_once([&](){
+            statusLabel.set_visible(false);
+        }, 2000);
     }
 
     void on_dropdown_change() {
@@ -78,9 +86,9 @@ public:
         aliasList.removeAliases();
 
         if(aliases.size() == 0) {
-            statusLabel.set_text("No aliases found");
+            update_status_label("No aliases found");
         } else {
-            statusLabel.set_text(std::to_string(aliases.size()) + " aliases found");
+            update_status_label(std::to_string(aliases.size()) + " aliases found");
             aliasList.addAliases(
                 aliases,
                 [this](const std::string& oldAlias, const std::string& newAlias, const std::string& command) {
@@ -96,34 +104,22 @@ public:
 
     void saveAlias(const std::string& oldAlias, const std::string& newAlias, const std::string& command) {
         std::cout << "Saving: " << oldAlias << " → " << newAlias << " = " << command << std::endl;
-        statusLabel.set_visible(true);
-
-        // lambda function to hide after 1000 ms
-        Glib::signal_timeout().connect_once([&](){
-            statusLabel.set_visible(false);
-        }, 2000);
 
         if (fileManager.updateAlias(selectedItem.second, oldAlias, newAlias, command)) {
-            statusLabel.set_text("Alias updated successfully");
+            update_status_label("Alias updated successfully");
         } else {
-            statusLabel.set_text("Failed to update alias");
+            update_status_label("Failed to update alias");
         }
         refreshAliasList();
     }
 
     void removeAlias(const std::string& alias) {
         std::cout << "Removing alias: " << alias << std::endl;
-        statusLabel.set_visible(true);
-
-        // lambda function to hide after 2000 ms
-        Glib::signal_timeout().connect_once([&](){
-            statusLabel.set_visible(false);
-        }, 2000);
 
         if (fileManager.removeAlias(selectedItem.second, alias)) {
-            statusLabel.set_text("Alias removed successfully");
+            update_status_label("Alias removed successfully");
         } else {
-            statusLabel.set_text("Failed to remove alias");
+            update_status_label("Failed to remove alias");
         }
         refreshAliasList();
     }
@@ -133,9 +129,9 @@ public:
         aliasList.removeAliases();
 
         if (aliases.empty()) {
-            statusLabel.set_text("No aliases found");
+            update_status_label("No aliases found");
         } else {
-            statusLabel.set_text(std::to_string(aliases.size()) + " aliases found");
+            update_status_label(std::to_string(aliases.size()) + " aliases found");
             aliasList.addAliases(
                 aliases,
                 [this](const std::string& oldAlias, const std::string& newAlias, const std::string& command) {
@@ -169,15 +165,20 @@ public:
 
     std::function<void()> addClicked = [this]() {
         std::cout << "Add button clicked" << std::endl;
-        // open new alias window
         auto newAliasWindow = new NewAliasWindow(
-        [this](std::string alias,std::string command){
-            return (fileManager.appendAlias(selectedItem.second, alias, command));
-
-        });
+            [this](std::string alias, std::string command) {
+                bool success = fileManager.appendAlias(selectedItem.second, alias, command);
+                if (success) {
+                    update_status_label("Alias added successfully");
+                }
+                return success;
+            },
+            [this]() {
+                refreshAliasList();
+            }
+        );
         newAliasWindow->set_transient_for(*this);
         newAliasWindow->set_modal(true);
-        //show the window
         newAliasWindow->show();
     };
 
