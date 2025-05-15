@@ -1,3 +1,4 @@
+// Updated from original file.h :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}
 #ifndef ALIASM_UTIL_FILE_H
 #define ALIASM_UTIL_FILE_H
 
@@ -10,7 +11,7 @@
 namespace fs = std::filesystem;
 
 class filemanager{
-    private:
+private:
     fs::path homeDir;
 
     fs::path getHome(){
@@ -21,13 +22,12 @@ class filemanager{
         return home;
     }
 
-    public:
+public:
     filemanager(){
         homeDir = getHome();
     }
 
     bool searchRc(std::string filename){
-        bool found = false;
         for (const auto& entry : std::filesystem::directory_iterator(homeDir)) {
             if (entry.path().filename() == filename){
                 return true;
@@ -42,13 +42,13 @@ class filemanager{
         if (!file)
             throw std::runtime_error("Could not open file: " + filename);
 
-        const std::regex rx(R"(^\s*alias\s+([A-Za-z0-9_\-]+)\s*=\s*['"]([^'"]+)['"]\s*$)");
+        const std::regex rx(R"(^\s*alias\s+([A-Za-z0-9_\-]+)\s*=\s*(['\"])(.*)\2\s*$)");
         std::string line;
         std::smatch m;
 
         while (std::getline(file, line)) {
             if (std::regex_match(line, m, rx))
-                aliases.emplace_back(m[1].str(), m[2].str());
+                aliases.emplace_back(m[1].str(), m[3].str());
         }
         return aliases;
     }
@@ -69,7 +69,7 @@ class filemanager{
 
         std::stringstream buffer;
         std::string line;
-        const std::regex rx(R"(^\s*alias\s+)" + oldAlias + R"(\s*=\s*['"]([^'"]+)['"]\s*$)");
+        const std::regex rx("^\\s*alias\\s+" + oldAlias + "\\s*=\\s*(['\"])(.*)\\1\\s*$");
         bool found = false;
 
         while (std::getline(file, line)) {
@@ -101,7 +101,7 @@ class filemanager{
 
         std::stringstream buffer;
         std::string line;
-        const std::regex rx(R"(^\s*alias\s+)" + aliasToRemove + R"(\s*=\s*['"]([^'"]+)['"]\s*$)");
+        const std::regex rx("^\\s*alias\\s+" + aliasToRemove + "\\s*=\\s*(['\"])(.*)\\1\\s*$");
         bool found = false;
 
         while (std::getline(file, line)) {
