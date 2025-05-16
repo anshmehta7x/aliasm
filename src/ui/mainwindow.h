@@ -15,6 +15,7 @@
 #include "addalias.h"
 #include <glibmm/main.h>
 #include "newaliaswindow.h"
+#include "confirm.h"
 
 class MainWindow : public Gtk::Window {
 public:
@@ -116,13 +117,26 @@ public:
     void removeAlias(const std::string& alias) {
         std::cout << "Removing alias: " << alias << std::endl;
 
-        if (fileManager.removeAlias(selectedItem.second, alias)) {
-            update_status_label("Alias removed successfully");
-        } else {
-            update_status_label("Failed to remove alias");
-        }
-        refreshAliasList();
+        auto confirmWindow = new ConfirmWindow(
+            "Are you sure you want to remove this alias?",
+            [this, alias]() {
+                if (fileManager.removeAlias(selectedItem.second, alias)) {
+                    update_status_label("Alias removed successfully");
+                } else {
+                    update_status_label("Failed to remove alias");
+                }
+                refreshAliasList();
+            },
+            []() {
+                // No action needed when user cancels
+            }
+        );
+
+        confirmWindow->set_transient_for(*this);
+        confirmWindow->set_modal(true);
+        confirmWindow->show();
     }
+
 
     void refreshAliasList() {
         aliases = fileManager.getAliases(selectedItem.second);
