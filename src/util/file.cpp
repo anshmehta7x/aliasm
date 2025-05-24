@@ -118,3 +118,16 @@ bool filemanager::removeAlias(std::string filename, const std::string& aliasToRe
     outfile << buffer.str();
     return true;
 }
+
+
+bool filemanager::writeAliasesToFile(const std::string& directory, const std::vector<std::pair<std::string, std::string>>& aliases) {
+    std::ofstream outfile(fs::path(directory) / "exported-aliases");
+    if (!outfile)
+        return false;
+
+    for (const auto& [alias, command] : aliases) {
+        outfile << alias << "=\"" << command <<"\""<< std::endl;
+    }
+
+    return true;
+}

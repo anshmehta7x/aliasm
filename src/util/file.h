@@ -15,6 +15,7 @@ public:
     bool appendAlias(std::string filename, const std::string alias, const std::string command);
     bool updateAlias(std::string filename, const std::string& oldAlias, const std::string& newAlias, const std::string& command);
     bool removeAlias(std::string filename, const std::string& aliasToRemove);
+    bool writeAliasesToFile(const std::string& directory, const std::vector<std::pair<std::string, std::string>>& aliases);
 
 private:
     std::filesystem::path homeDir;

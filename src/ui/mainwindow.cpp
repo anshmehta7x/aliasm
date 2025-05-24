@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "newaliaswindow.h"
 #include "confirm.h"
+#include "export.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -39,7 +40,12 @@ MainWindow::MainWindow(std::vector<Glib::ustring> items)
 
     exportClicked = [this]() {
         std::cout << "Export button clicked" << std::endl;
+        auto exportWindow = new ExportWindow(aliases);
+        exportWindow->set_transient_for(*this);
+        exportWindow->set_modal(true);
+        exportWindow->show();
         // Implement export functionality here
+
     };
 
     importClicked = [this]() {
