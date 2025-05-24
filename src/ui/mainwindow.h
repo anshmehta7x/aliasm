@@ -14,9 +14,7 @@
 #include <functional>
 #include "../util/file.h"
 #include "aliaslist.h"
-#include "addalias.h"
-#include "newaliaswindow.h"
-#include "confirm.h"
+#include "featurerow.h"
 
 class MainWindow : public Gtk::Window {
 public:
@@ -28,13 +26,15 @@ private:
     Gtk::Label statusLabel;
     AliasList aliasList;
     Gtk::ScrolledWindow scrolled;
-    AddButton add;
+    FeatureButtonRow add;
 
     filemanager fileManager;
     std::pair<Glib::ustring, std::string> selectedItem;
     std::vector<std::pair<std::string, std::string>> aliases;
 
     std::function<void()> addClicked;
+    std::function<void()> exportClicked;
+    std::function<void()> importClicked;
 
     void update_status_label(std::string newText);
     void on_dropdown_change();

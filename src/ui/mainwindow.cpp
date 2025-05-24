@@ -1,4 +1,6 @@
 #include "mainwindow.h"
+#include "newaliaswindow.h"
+#include "confirm.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -34,6 +36,18 @@ MainWindow::MainWindow(std::vector<Glib::ustring> items)
         newAliasWindow->show();
     };
 
+
+    exportClicked = [this]() {
+        std::cout << "Export button clicked" << std::endl;
+        // Implement export functionality here
+    };
+
+    importClicked = [this]() {
+        std::cout << "Import button clicked" << std::endl;
+        // Implement import functionality here
+    };
+
+
     if (items.empty()) {
         update_status_label(".bashrc or .zshrc not found");
         m_box.append(statusLabel);
@@ -41,7 +55,9 @@ MainWindow::MainWindow(std::vector<Glib::ustring> items)
         setupDropdown(items);
         m_box.append(dropdown);
         statusLabel.set_visible(false);
-        add.set_on_click(addClicked);
+        add.set_addbtn_on_click(addClicked);
+        add.set_exportbtn_on_click(exportClicked);
+        add.set_importbtn_on_click(importClicked);
         m_box.append(statusLabel);
         m_box.append(add);
         m_box.append(scrolled);
