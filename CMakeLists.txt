@@ -8,7 +8,20 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
 
-add_executable(aliasm src/main.cpp)
-target_include_directories(aliasm PRIVATE ${GTKMM_INCLUDE_DIRS})
+file(GLOB_RECURSE UI_SOURCES src/ui/*.cpp)
+file(GLOB_RECURSE UTIL_SOURCES src/util/*.cpp)
+
+add_executable(aliasm
+    src/main.cpp
+    ${UI_SOURCES}
+    ${UTIL_SOURCES}
+)
+
+target_include_directories(aliasm PRIVATE
+    ${GTKMM_INCLUDE_DIRS}
+    src/ui
+    src/util
+)
+
 target_link_libraries(aliasm PRIVATE ${GTKMM_LIBRARIES})
 target_compile_options(aliasm PRIVATE ${GTKMM_CFLAGS_OTHER})
