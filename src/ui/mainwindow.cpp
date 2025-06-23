@@ -2,6 +2,7 @@
 #include "newaliaswindow.h"
 #include "confirm.h"
 #include "export.h"
+#include "importwindow.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -50,7 +51,19 @@ MainWindow::MainWindow(std::vector<Glib::ustring> items)
 
     importClicked = [this]() {
         std::cout << "Import button clicked" << std::endl;
-        // Implement import functionality here
+        auto importWindow = new ImportWindow(
+            [this](const std::vector<std::pair<std::string, std::string>>& importedAliases) {
+                if (fileManager.importAliases(selectedItem.second, importedAliases)) {
+                    update_status_label("Aliases imported successfully");
+                    refreshAliasList();
+                } else {
+                    update_status_label("Failed to import aliases");
+                }
+            }
+        );
+        importWindow->set_transient_for(*this);
+        importWindow->set_modal(true);
+        importWindow->show();
     };
 
 

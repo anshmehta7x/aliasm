@@ -17,6 +17,9 @@ public:
     bool removeAlias(std::string filename, const std::string& aliasToRemove);
     bool writeAliasesToFile(const std::string& directory, const std::vector<std::pair<std::string, std::string>>& aliases);
 
+    bool importAliases(std::string filename, const std::vector<std::pair<std::string, std::string>>& aliases);
+    std::vector<std::pair<std::string, std::string>> readAliasesFromFile(const std::string& filepath);
+
 private:
     std::filesystem::path homeDir;
     std::filesystem::path getHome();
