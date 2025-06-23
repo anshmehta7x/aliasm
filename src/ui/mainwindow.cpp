@@ -31,6 +31,14 @@ MainWindow::MainWindow(std::vector<Glib::ustring> items)
             },
             [this]() {
                 refreshAliasList();
+            },
+            [this](const std::string& alias) {
+                for (const auto& existingAlias : aliases) {
+                    if (existingAlias.first == alias) {
+                        return true;
+                    }
+                }
+                return false;
             }
         );
         newAliasWindow->set_transient_for(*this);
@@ -45,7 +53,6 @@ MainWindow::MainWindow(std::vector<Glib::ustring> items)
         exportWindow->set_transient_for(*this);
         exportWindow->set_modal(true);
         exportWindow->show();
-        // Implement export functionality here
 
     };
 
@@ -87,6 +94,8 @@ MainWindow::MainWindow(std::vector<Glib::ustring> items)
         sigc::mem_fun(*this, &MainWindow::on_dropdown_change)
     );
 }
+
+
 
 void MainWindow::update_status_label(std::string newText) {
     statusLabel.set_visible(true);
