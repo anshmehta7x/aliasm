@@ -1,9 +1,9 @@
 #include "newaliaswindow.h"
 
 NewAliasWindow::NewAliasWindow(const std::function<bool(std::string, std::string)>& callback,
-                               const std::function<void()>& refreshCallback)
-    : n_box(Gtk::Orientation::VERTICAL, 10)
-{
+                               const std::function<void()>& refreshCallback,
+                               const std::function<bool(const std::string&)>& conflictChecker)
+    : n_box(Gtk::Orientation::VERTICAL, 10), checkConflict(conflictChecker) {
     set_title("Add New Alias");
     set_default_size(300, 200);
     set_resizable(false);
@@ -25,6 +25,11 @@ NewAliasWindow::NewAliasWindow(const std::function<bool(std::string, std::string
     addButton.signal_clicked().connect([this, callback, refreshCallback]() {
         if (aliasEntry.get_text().empty() || commandEntry.get_text().empty()) {
             update_status_label("Alias and command cannot be empty");
+            return;
+        }
+
+        if (checkConflict(aliasEntry.get_text())) {
+            update_status_label("Alias already exists! Choose a different name.");
             return;
         }
 

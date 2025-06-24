@@ -12,8 +12,10 @@
 
 class NewAliasWindow : public Gtk::Window {
 public:
-    NewAliasWindow(const std::function<bool(std::string, std::string)>& callback,
-                   const std::function<void()>& refreshCallback);
+NewAliasWindow(const std::function<bool(std::string, std::string)>& callback,
+               const std::function<void()>& refreshCallback,
+               const std::function<bool(const std::string&)>& conflictChecker);
+
 
 private:
     Gtk::Box n_box;
@@ -23,6 +25,8 @@ private:
     Gtk::Entry aliasEntry;
     Gtk::Entry commandEntry;
     Gtk::Button addButton;
+    std::function<bool(const std::string&)> checkConflict;
+
 
     void update_status_label(std::string newText);
 };

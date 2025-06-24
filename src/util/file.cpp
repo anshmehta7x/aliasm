@@ -5,6 +5,7 @@
 #include <regex>
 #include <sstream>
 #include <cstdlib>
+#include <set>
 
 namespace fs = std::filesystem;
 
@@ -117,4 +118,60 @@ bool filemanager::removeAlias(std::string filename, const std::string& aliasToRe
 
     outfile << buffer.str();
     return true;
+}
+
+
+bool filemanager::writeAliasesToFile(const std::string& directory, const std::vector<std::pair<std::string, std::string>>& aliases) {
+    std::ofstream outfile(fs::path(directory) / "exported-aliases");
+    if (!outfile)
+        return false;
+
+    for (const auto& [alias, command] : aliases) {
+        outfile << alias << "=\"" << command <<"\""<< std::endl;
+    }
+
+    return true;
+}
+
+bool filemanager::importAliases(std::string filename, const std::vector<std::pair<std::string, std::string>>& aliases) {
+    auto existingAliases = getAliases(filename);
+    std::set<std::string> existingNames;
+
+    for (const auto& [name, _] : existingAliases) {
+        existingNames.insert(name);
+    }
+
+    std::ofstream file(homeDir / filename, std::ios::app);
+    if (!file) return false;
+
+    int imported = 0;
+    for (const auto& [alias, command] : aliases) {
+        if (existingNames.find(alias) == existingNames.end()) {
+            file << "alias " << alias << "=\"" << command << "\"" << std::endl;
+            imported++;
+        }
+    }
+
+    return imported > 0;
+}
+
+std::vector<std::pair<std::string, std::string>> filemanager::readAliasesFromFile(const std::string& filepath) {
+    std::vector<std::pair<std::string, std::string>> aliases;
+    std::ifstream file(filepath);
+    if (!file) return aliases;
+
+    std::string line;
+    const std::regex rx1(R"(^\s*alias\s+([A-Za-z0-9_\-]+)\s*=\s*(['\"])(.*)\2\s*$)");
+    const std::regex rx2(R"(^\s*([A-Za-z0-9_\-]+)\s*=\s*(['\"])(.*)\2\s*$)");
+    std::smatch m;
+
+    while (std::getline(file, line)) {
+        if (std::regex_match(line, m, rx1)) {
+            aliases.emplace_back(m[1].str(), m[3].str());
+        } else if (std::regex_match(line, m, rx2)) {
+            aliases.emplace_back(m[1].str(), m[3].str());
+        }
+    }
+
+    return aliases;
 }

@@ -1,4 +1,8 @@
 #include "mainwindow.h"
+#include "newaliaswindow.h"
+#include "confirm.h"
+#include "export.h"
+#include "importwindow.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -27,12 +31,48 @@ MainWindow::MainWindow(std::vector<Glib::ustring> items)
             },
             [this]() {
                 refreshAliasList();
+            },
+            [this](const std::string& alias) {
+                for (const auto& existingAlias : aliases) {
+                    if (existingAlias.first == alias) {
+                        return true;
+                    }
+                }
+                return false;
             }
         );
         newAliasWindow->set_transient_for(*this);
         newAliasWindow->set_modal(true);
         newAliasWindow->show();
     };
+
+
+    exportClicked = [this]() {
+        std::cout << "Export button clicked" << std::endl;
+        auto exportWindow = new ExportWindow(aliases);
+        exportWindow->set_transient_for(*this);
+        exportWindow->set_modal(true);
+        exportWindow->show();
+
+    };
+
+    importClicked = [this]() {
+        std::cout << "Import button clicked" << std::endl;
+        auto importWindow = new ImportWindow(
+            [this](const std::vector<std::pair<std::string, std::string>>& importedAliases) {
+                if (fileManager.importAliases(selectedItem.second, importedAliases)) {
+                    update_status_label("Aliases imported successfully");
+                    refreshAliasList();
+                } else {
+                    update_status_label("Failed to import aliases");
+                }
+            }
+        );
+        importWindow->set_transient_for(*this);
+        importWindow->set_modal(true);
+        importWindow->show();
+    };
+
 
     if (items.empty()) {
         update_status_label(".bashrc or .zshrc not found");
@@ -41,7 +81,9 @@ MainWindow::MainWindow(std::vector<Glib::ustring> items)
         setupDropdown(items);
         m_box.append(dropdown);
         statusLabel.set_visible(false);
-        add.set_on_click(addClicked);
+        add.set_addbtn_on_click(addClicked);
+        add.set_exportbtn_on_click(exportClicked);
+        add.set_importbtn_on_click(importClicked);
         m_box.append(statusLabel);
         m_box.append(add);
         m_box.append(scrolled);
@@ -52,6 +94,8 @@ MainWindow::MainWindow(std::vector<Glib::ustring> items)
         sigc::mem_fun(*this, &MainWindow::on_dropdown_change)
     );
 }
+
+
 
 void MainWindow::update_status_label(std::string newText) {
     statusLabel.set_visible(true);
